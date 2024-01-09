@@ -1,0 +1,35 @@
+package service.broker;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
+
+import service.core.ClientInfo;
+import service.core.Quotation;
+
+/**
+ * Implementation of the broker service that uses the Service Registry.
+ * 
+ * @author Rem
+ *
+ */
+public class LocalBrokerService {
+	private final String[] urls = {"http://localhost:8080/quotations", "http://localhost:8081/quotations", "http://localhost:8082/quotations"};
+	
+	public List<Quotation> getQuotations(ClientInfo info) {
+        RestTemplate restTemplate = new RestTemplate();
+        List<Quotation> quotationsList = new ArrayList<>();
+        for (String url : urls) {
+            ResponseEntity<Quotation> response = restTemplate.postForEntity(url, info, Quotation.class);
+            if (response.getStatusCode().equals(HttpStatus.OK)) {
+                Quotation quotation = response.getBody();
+                quotationsList.add(quotation);
+            }
+        }
+        return quotationsList;
+    }
+}

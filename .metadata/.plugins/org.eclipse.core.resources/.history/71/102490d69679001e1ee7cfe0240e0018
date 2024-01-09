@@ -1,0 +1,80 @@
+package service.controllers;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.TreeMap;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import service.auldfellas.AFQService;
+import service.broker.LocalBrokerService;
+import service.core.Application;
+import service.core.ClientInfo;
+import service.core.Quotation;
+
+@RestController
+public class QuotationController {
+	private Map<Integer, Application> applicationMap = new TreeMap<>();
+	private LocalBrokerService service = new LocalBrokerService();
+	
+	@Value("${server.port}")
+	private int port;
+
+
+	@GetMapping(value = "/applications", produces = "application/json")
+	public ResponseEntity<ArrayList<String>> getQuotations() {
+		ArrayList<String> list = new ArrayList<>();
+		for (Application application : applicationMap.values()) {
+			list.add("http:" + getHost() + "/quotations/" + application.getId());
+		}
+		return ResponseEntity.status(HttpStatus.OK).body(list);
+	}
+	
+	@GetMapping(value="/applications/{id}", produces={"application/json"})
+	public ResponseEntity<Application> getQuotation(@PathVariable String id) {
+	 Application application = applicationMap.get(id);
+	 if (application == null) {
+	 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+	 }
+	 return ResponseEntity.status(HttpStatus.OK).body(application);
+	}
+
+	@PostMapping(value = "/applications", consumes = "application/json")
+	public ResponseEntity<Quotation> createQuotation(@RequestBody ClientInfo info) {
+		Quotation quotation = service.generateQuotation(info);
+		quotations.put(quotation.reference, quotation);
+		String url = "http://" + getHost() + "/quotations/" + quotation.reference;
+		return ResponseEntity.status(HttpStatus.CREATED).header("Location", url).header("Content-Location", url)
+				.body(quotation);
+	}
+	
+	@RequestMapping(value = "/applications/{application-number}", method = RequestMethod.GET)
+    public ClientApplication getApplication(@PathVariable("application-number") int appNumber) {
+        ClientApplication clientApplication = clientApplicationMap.get(appNumber);
+        if (clientApplication == null) throw new NoSuchQuotationException();
+        return clientApplication;
+    }
+
+    @RequestMapping(value = "/applications", method = RequestMethod.GET)
+    public List<ClientApplication> applicationList() {
+        return new ArrayList<>(clientApplicationMap.values());
+    }
+
+	private String getHost() {
+		try {
+			return InetAddress.getLocalHost().getHostAddress() + ":" + port;
+		} catch (UnknownHostException e) {
+			return "localhost:" + port;
+		}
+	}
+}

@@ -1,0 +1,23 @@
+package service.controllers;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.TreeMap;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import service.auldfellas.AFQService;
+import service.core.Quotation;
+
+@RestController
+public class QuotationController {
+	private Map<String, Quotation> quotations = new TreeMap<>();
+	private AFQService service = new AFQService();
+
+	@GetMapping(value = "/quotations", produces = "application/json")
+	public ResponseEntity<Collection<Quotation>> getQuotations() {
+		return ResponseEntity.status(HttpStatus.OK).body(quotations.values());
+	}
+}

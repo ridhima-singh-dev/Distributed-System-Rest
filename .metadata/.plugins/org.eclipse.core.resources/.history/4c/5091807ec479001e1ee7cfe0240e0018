@@ -1,0 +1,43 @@
+package client;
+
+import java.io.IOException;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClients;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import service.core.ClientInfo;
+
+public class ApplicationClient {
+
+	public static void main(String[] args) {
+		try {
+			HttpClient httpClient = HttpClients.createDefault();
+			String serverUrl = "http://localhost:8083/applications";
+			ClientInfo request = new ClientInfo("Niki Collier", ClientInfo.FEMALE, 49, 1.5494, 80, false, false);
+			// Create an instance of HttpPost for the server URL
+			HttpPost httpPost = new HttpPost(serverUrl);
+
+			ObjectMapper objectMapper = new ObjectMapper();
+			String json;
+
+			json = objectMapper.writeValueAsString(request);
+
+			StringEntity entity = new StringEntity(json);
+			httpPost.setEntity(entity);
+			httpPost.setHeader("Content-Type", "application/json");
+
+			// Execute the POST request
+			HttpResponse response = httpClient.execute(httpPost);
+
+			// Check the response status code and handle the response
+			int statusCode = response.getStatusLine().getStatusCode();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+}

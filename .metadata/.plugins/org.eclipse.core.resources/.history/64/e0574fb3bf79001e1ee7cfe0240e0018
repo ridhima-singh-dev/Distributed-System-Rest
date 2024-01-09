@@ -1,0 +1,54 @@
+package client;
+
+import java.text.NumberFormat;
+
+import service.broker.LocalBrokerService;
+import service.core.ClientInfo;
+import service.core.Quotation;
+
+public class Main {
+	LocalBrokerService localBrokerService = new LocalBrokerService();
+	public static void main(String[] args) {
+ 
+		try {
+            // Create an instance of HttpClient
+            HttpClient httpClient = HttpClients.createDefault();
+
+            // Define the server URL
+            String serverUrl = "http://localhost:8080/applications"; // Replace with your server URL
+
+            // Create an instance of HttpPost for the server URL
+            HttpPost httpPost = new HttpPost(serverUrl);
+
+            // Create a ClientInfo object and serialize it to JSON
+            ClientInfo clientInfo = new ClientInfo();
+            clientInfo.setName("John Doe");
+            clientInfo.setGender("M");
+            // Set other client information as needed
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String json = objectMapper.writeValueAsString(clientInfo);
+
+            // Set the JSON payload as the request entity
+            StringEntity entity = new StringEntity(json);
+            httpPost.setEntity(entity);
+            httpPost.setHeader("Content-Type", "application/json");
+
+            // Execute the POST request
+            HttpResponse response = httpClient.execute(httpPost);
+
+            // Check the response status code and handle the response as needed
+            int statusCode = response.getStatusLine().getStatusCode;
+            if (statusCode == 201) {
+                // The request was successful (HTTP status 201 Created)
+                // You can handle the response content if needed
+            } else {
+                // Handle other response codes and errors
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+	}
+	
+	
+}
